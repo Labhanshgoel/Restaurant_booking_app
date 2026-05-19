@@ -8,6 +8,5 @@ npm-debug.log
 .idea
 node_modules
 public/uploads
-config/multer.js
 .DS_Store
 *.log

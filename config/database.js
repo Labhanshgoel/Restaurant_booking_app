@@ -39,7 +39,7 @@ const connectDB = async () => {
     }
     
     console.error('\n📖 See MONGODB_ATLAS_SETUP.md for detailed setup instructions');
-    process.exit(1);
+    throw error;
   }
 };
 

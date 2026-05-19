@@ -1,0 +1,13 @@
+.git
+.gitignore
+README.md
+MONGODB_ATLAS_SETUP.md
+npm-debug.log
+.env.example
+.vscode
+.idea
+node_modules
+public/uploads
+config/multer.js
+.DS_Store
+*.log

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Menu - FoodieHub</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      background: linear-gradient(135deg, #f5f7ff 0%, #fafbff 100%);
+      min-height: 100vh;
+    }
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      z-index: 100;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    .back-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+    .restaurant-hero {
+      background: white;
+      border-radius: 15px;
+      padding: 24px;
+      margin-top: 60px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      align-items: center;
+      animation: slideUp 0.5s ease;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .restaurant-hero img {
+      width: 200px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .restaurant-info h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .restaurant-info .cuisine {
+      font-size: 1rem;
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .restaurant-info .location {
+      color: #777;
+      font-size: 0.95rem;
+    }
+    .dishes-header {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin: 24px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dishes-header i {
+      color: #667eea;
+    }
+    .dishes-list {
+      display: grid;
+      gap: 12px;
+    }
+    .dish-item {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+      transition: all 0.2s ease;
+      border-left: 4px solid #667eea;
+    }
+    .dish-item:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    .dish-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dish-price {
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .dish-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .dish-description {
+      color: #777;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .dish-meta {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .dish-badge {
+      display: inline-block;
+      background: #f0f0f0;
+      color: #667eea;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .no-dishes {
+      background: white;
+      border-radius: 15px;
+      padding: 40px 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+    }
+    .no-dishes-icon {
+      font-size: 3rem;
+      color: #ddd;
+      margin-bottom: 12px;
+    }
+    .no-dishes p {
+      color: #999;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="goHome()"><i class="fas fa-arrow-left"></i> Back</button>
+
+  <div class="container">
+    <div class="restaurant-hero">
+      <img src="/menu.jpg" alt="Restaurant menu" />
+      <div class="restaurant-info">
+        <h1 id="restName">Restaurant</h1>
+        <div class="cuisine" id="restCuisine"></div>
+        <div class="location" id="restCity"></div>
+        <div class="location" id="restDistance" style="margin-top:6px; font-weight:600; color:#444;"></div>
+      </div>
+    </div>
+
+    <div class="dishes-header">
+      <i class="fas fa-list"></i> Menu Items
+    </div>
+    <div id="dishesList" class="dishes-list"></div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    function goHome(){ window.location.href = '/'; }
+    function getParam(name){ return new URLSearchParams(window.location.search).get(name) || ''; }
+
+    async function loadMenu(){
+      const restaurantId = getParam('restaurantId');
+      if(!restaurantId){ document.getElementById('dishesList').innerHTML = '<div class="no-dishes"><div class="no-dishes-icon"><i class="fas fa-alert-circle"></i></div><p>No restaurant selected</p></div>'; return; }
+
+      try{
+        const rRes = await fetch(`${API_BASE}/restaurants/${restaurantId}`);
+        const rData = await rRes.json();
+        if(rData.success){
+          const r = rData.data;
+          document.getElementById('restName').textContent = r.name;
+          document.getElementById('restCuisine').textContent = r.cuisine || '';
+          // Always show Jhansla in the nav location
+          document.getElementById('restCity').textContent = 'Jhansla';
+
+          // Use fixed user location (30.51623 N, 76.66065 E)
+          // and compute distance to a fixed Jhansla coordinate for all restaurants
+          try{
+            const userLoc = { lat: 30.51623, lon: 76.66065 };
+            const jhansla = { lat: 30.52000, lon: 76.66000 };
+            const dkm = haversineDistance(userLoc.lat, userLoc.lon, jhansla.lat, jhansla.lon);
+            document.getElementById('restDistance').textContent = `${dkm.toFixed(1)} km away`;
+          } catch(e){ console.error(e); }
+        }
+
+        const dRes = await fetch(`${API_BASE}/dishes/restaurant/${restaurantId}`);
+        const dData = await dRes.json();
+        const list = document.getElementById('dishesList');
+        list.innerHTML = '';
+        if(dData.success && Array.isArray(dData.data) && dData.data.length){
+          dData.data.forEach((d, idx) => {
+            const el = document.createElement('div');
+            el.className = 'dish-item';
+            const badges = [];
+            if(d.isVegetarian) badges.push('<span class="dish-badge"><i class="fas fa-leaf"></i> Vegetarian</span>');
+            if(d.isVegan) badges.push('<span class="dish-badge"><i class="fas fa-leaf"></i> Vegan</span>');
+            if(d.isGlutenFree) badges.push('<span class="dish-badge"><i class="fas fa-wheat-awn"></i> Gluten Free</span>');
+            // Determine how many buttons this dish should show
+            let buttonsHtml = '';
+            if (idx === 0) {
+              // First dish: only first button
+              buttonsHtml = `<div class="razorpay-placeholder" data-button="pl_RN70rac0EX8ZT3"></div>`;
+            } else if (idx === 1) {
+              // Second dish: only second button
+              buttonsHtml = `<div class="razorpay-placeholder" data-button="pl_RN8VspdcHhX6kt"></div>`;
+            } else {
+              // Other dishes: two buttons by default
+              buttonsHtml = `<div class="razorpay-placeholder" data-button="pl_RN70rac0EX8ZT3"></div><div class="razorpay-placeholder" data-button="pl_RN8VspdcHhX6kt"></div>`;
+            }
+
+            el.innerHTML = `
+              <div class="dish-name">
+                <span>${d.name}</span>
+                <div class="dish-actions">
+                  ${buttonsHtml}
+                </div>
+              </div>
+              ${d.description ? `<div class="dish-description">${d.description}</div>` : ''}
+              ${badges.length ? `<div class="dish-meta">${badges.join('')}</div>` : ''}
+            `;
+            list.appendChild(el);
+
+            // Dynamically insert Razorpay payment-button scripts into placeholders
+            const placeholders = el.querySelectorAll('.razorpay-placeholder');
+            placeholders.forEach(ph => {
+              const form = document.createElement('form');
+              const script = document.createElement('script');
+              script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
+              script.setAttribute('data-payment_button_id', ph.getAttribute('data-button'));
+              script.async = true;
+              form.appendChild(script);
+              ph.parentNode.replaceChild(form, ph);
+            });
+          });
+        } else {
+          list.innerHTML = '<div class="no-dishes"><div class="no-dishes-icon"><i class="fas fa-inbox"></i></div><p>No dishes available yet</p></div>';
+        }
+      } catch(err){
+        console.error(err);
+        document.getElementById('dishesList').innerHTML = '<div class="no-dishes"><div class="no-dishes-icon"><i class="fas fa-wifi-off"></i></div><p>Error loading menu</p></div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMenu);
+
+    // --- location helpers for menu page ---
+    function promptLocationAndRefresh(){ getUserLocation(true).then(()=> loadMenu()); }
+
+    function getUserLocation(forcePrompt = false){
+      return new Promise((resolve) => {
+        if(!navigator.geolocation) return resolve(null);
+        if(navigator.permissions && !forcePrompt){
+          navigator.permissions.query({ name: 'geolocation' }).then(p => {
+            if(p.state === 'denied') return resolve(null);
+            navigator.geolocation.getCurrentPosition(pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }), () => resolve(null), { maximumAge:60000, timeout:10000 });
+          }).catch(() => {
+            navigator.geolocation.getCurrentPosition(pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }), () => resolve(null), { maximumAge:60000, timeout:10000 });
+          });
+        } else {
+          navigator.geolocation.getCurrentPosition(pos => {
+            const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+            console.log('User location detected (menu page):', loc);
+            resolve(loc);
+          }, () => resolve(null), { maximumAge:60000, timeout:10000 });
+        }
+      });
+    }
+
+    function haversineDistance(lat1, lon1, lat2, lon2){
+      const toRad = v => v * Math.PI / 180;
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)*Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+  </script>
+</body>
+</html>

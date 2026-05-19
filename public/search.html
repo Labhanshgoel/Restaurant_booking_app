@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Search Results - FoodieHub</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding-top: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .header {
+      background: white;
+      border-radius: 15px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .back-btn {
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      font-weight: 600;
+      transition: transform 0.2s ease;
+    }
+    .back-btn:hover {
+      transform: translateY(-2px);
+    }
+    .query-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    .result-section {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+      overflow: hidden;
+      animation: slideUp 0.5s ease;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .section-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 16px 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-header i {
+      font-size: 1.1rem;
+    }
+    .result-list {
+      padding: 0;
+    }
+    .result-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .result-item:last-child {
+      border-bottom: none;
+    }
+    .result-item:hover {
+      background: linear-gradient(135deg, #f5f7ff, #fafbff);
+      padding-left: 24px;
+    }
+    .result-icon {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      min-width: 30px;
+      text-align: center;
+    }
+    .result-content {
+      flex: 1;
+    }
+    .result-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .result-meta {
+      color: #777;
+      font-size: 0.9rem;
+    }
+    .no-results {
+      background: white;
+      border-radius: 15px;
+      padding: 40px 20px;
+      text-align: center;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.1);
+    }
+    .no-results-icon {
+      font-size: 3rem;
+      color: #ddd;
+      margin-bottom: 12px;
+    }
+    .no-results p {
+      color: #999;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="goHome()"><i class="fas fa-arrow-left"></i> Back</button>
+      <div class="query-text" id="queryText">Search Results</div>
+    </div>
+
+    <div id="resultsArea" class="results-grid">
+      <div class="no-results">
+        <div class="no-results-icon"><i class="fas fa-search"></i></div>
+        <p>Loading results...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+
+    function goHome(){ window.location.href = '/'; }
+
+    function getParam(name){
+      return new URLSearchParams(window.location.search).get(name) || '';
+    }
+
+    async function runSearch(){
+      const q = getParam('q').trim();
+      document.getElementById('queryText').textContent = q ? `Results for "${q}"` : 'Search Results';
+
+      if(!q) return;
+
+      try{
+        const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}&type=all`);
+        const data = await res.json();
+        if(data.success){
+          renderResults(data.data);
+        } else {
+          document.getElementById('resultsArea').innerHTML = `<div class="no-results"><div class="no-results-icon"><i class="fas fa-exclamation-circle"></i></div><p>${data.message || 'No results found'}</p></div>`;
+        }
+      } catch(err){
+        console.error(err);
+        document.getElementById('resultsArea').innerHTML = `<div class="no-results"><div class="no-results-icon"><i class="fas fa-wifi-off"></i></div><p>Network error</p></div>`;
+      }
+    }
+
+    function renderResults(data){
+      const area = document.getElementById('resultsArea');
+      area.innerHTML = '';
+
+      const { restaurants = [], dishes = [] } = data || {};
+
+      if(!restaurants.length && !dishes.length){
+        area.innerHTML = `<div class="no-results"><div class="no-results-icon"><i class="fas fa-search"></i></div><p>No results found</p></div>`;
+        return;
+      }
+
+      if(restaurants.length){
+        const sec = document.createElement('div');
+        sec.className = 'result-section';
+        sec.innerHTML = `<div class="section-header"><i class="fas fa-store"></i> Restaurants (${restaurants.length})</div>`;
+        const list = document.createElement('div');
+        list.className = 'result-list';
+        restaurants.forEach(r => {
+          const item = document.createElement('div');
+          item.className = 'result-item';
+          item.innerHTML = `
+            <div class="result-icon"><i class="fas fa-utensils"></i></div>
+            <div class="result-content">
+              <div class="result-name">${r.name}</div>
+              <div class="result-meta">${r.cuisine} • ${r.address && r.address.city ? r.address.city : 'Location TBA'}</div>
+            </div>
+          `;
+          item.addEventListener('click', ()=>{ window.location.href = `/menu.html?restaurantId=${r._id}` });
+          list.appendChild(item);
+        });
+        sec.appendChild(list);
+        area.appendChild(sec);
+      }
+
+      if(dishes.length){
+        const sec = document.createElement('div');
+        sec.className = 'result-section';
+        sec.innerHTML = `<div class="section-header"><i class="fas fa-bowl-food"></i> Dishes (${dishes.length})</div>`;
+        const list = document.createElement('div');
+        list.className = 'result-list';
+        dishes.forEach(d => {
+          const item = document.createElement('div');
+          item.className = 'result-item';
+          const restName = d.restaurant && d.restaurant.name ? `${d.restaurant.name}` : '';
+          const desc = (d.description||'').slice(0,100);
+          item.innerHTML = `
+            <div class="result-icon"><i class="fas fa-plate-wheat"></i></div>
+            <div class="result-content">
+              <div class="result-name">${d.name}${d.price ? ` • $${d.price.toFixed(2)}` : ''}</div>
+              <div class="result-meta">${desc}${restName ? ' • ' + restName : ''}</div>
+            </div>
+          `;
+          item.addEventListener('click', ()=>{ window.location.href = `/menu.html?restaurantId=${d.restaurant ? d.restaurant._id : ''}`; });
+          list.appendChild(item);
+        });
+        sec.appendChild(list);
+        area.appendChild(sec);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', runSearch);
+  </script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurant Chatbot - Dish Suggestions</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px 10px 0 0;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .message {
+      display: flex;
+      margin-bottom: 10px;
+      animation: slideIn 0.3s ease-in;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message.bot {
+      justify-content: flex-start;
+    }
+
+    .message-bubble {
+      max-width: 70%;
+      padding: 12px 15px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .user .message-bubble {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .bot .message-bubble {
+      background: #f1f1f1;
+      color: #333;
+    }
+
+    .recommended-dishes {
+      background: #f9f9f9;
+      border-left: 4px solid #667eea;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .recommended-dishes h4 {
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .dish-item {
+      padding: 5px 0;
+      color: #555;
+    }
+
+    .input-section {
+      padding: 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-group {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #667eea;
+    }
+
+    button {
+      padding: 12px 25px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error {
+      background: #fee;
+      border-left: 4px solid #c33;
+      color: #c33;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .auth-section {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .auth-section input {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .auth-section button {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🍽️ Restaurant Chatbot</h1>
+      <p>Get personalized dish recommendations</p>
+    </div>
+
+    <div id="authSection" class="auth-section" style="display: none;">
+      <h3 style="margin-bottom: 15px;">Login Required</h3>
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        style="display: none;"
+      />
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter your password"
+        style="display: none;"
+      />
+      <button id="loginBtn" style="display: none;">Login to Chat</button>
+      <p id="authMessage"></p>
+    </div>
+
+    <div id="chatSection" style="display: none; flex: 1; display: flex; flex-direction: column;">
+      <div class="chat-container" id="chatContainer"></div>
+
+      <div class="input-section">
+        <div class="input-group">
+          <input
+            type="text"
+            id="userInput"
+            placeholder="Ask for dish recommendations... (e.g., 'I'm vegetarian and prefer spicy food')"
+            autocomplete="off"
+          />
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    let chatHistory = [];
+
+    // Check if user is logged in
+    function checkAuth() {
+      if (!token) {
+        document.getElementById('authSection').style.display = 'block';
+        document.getElementById('chatSection').style.display = 'none';
+        document.getElementById('authMessage').textContent =
+          'Please log in to use the chatbot';
+      } else {
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('chatSection').style.display = 'flex';
+        initChat();
+      }
+    }
+
+    // Initialize chat
+    function initChat() {
+      const chatContainer = document.getElementById('chatContainer');
+      chatContainer.innerHTML = '';
+      chatHistory = [];
+
+      const welcomeMessage = document.createElement('div');
+      welcomeMessage.className = 'message bot';
+      welcomeMessage.innerHTML =
+        '<div class="message-bubble">👋 Hello! I\'m your restaurant assistant. Tell me what kind of food you\'re craving, any dietary preferences, or cuisine you\'d like, and I\'ll suggest the perfect dishes for you!</div>';
+      chatContainer.appendChild(welcomeMessage);
+    }
+
+    // Send message
+    async function sendMessage() {
+      const userInput = document.getElementById('userInput');
+      const message = userInput.value.trim();
+
+      if (!message) return;
+
+      // Add user message to chat
+      const chatContainer = document.getElementById('chatContainer');
+      const userMessageDiv = document.createElement('div');
+      userMessageDiv.className = 'message user';
+      userMessageDiv.innerHTML = `<div class="message-bubble">${message}</div>`;
+      chatContainer.appendChild(userMessageDiv);
+
+      userInput.value = '';
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      // Add to chat history
+      chatHistory.push({
+        role: 'user',
+        content: message
+      });
+
+      // Show loading indicator
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'message bot';
+      loadingDiv.innerHTML = '<div class="message-bubble"><div class="loading"></div></div>';
+      chatContainer.appendChild(loadingDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        // Send to API - use /suggest for first message, /chat for multi-turn
+        let response;
+        if (chatHistory.length === 1) {
+          // First message - use suggest endpoint
+          response = await fetch('/api/chatbot/suggest', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ prompt: message })
+          });
+        } else {
+          // Multi-turn conversation
+          response = await fetch('/api/chatbot/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ messages: chatHistory })
+          });
+        }
+
+        loadingDiv.remove();
+
+        if (!response.ok) {
+          throw new Error('API request failed');
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.message || 'Error getting response');
+        }
+
+        // Add bot response
+        const botMessageDiv = document.createElement('div');
+        botMessageDiv.className = 'message bot';
+        let botContent = `<div class="message-bubble">${data.suggestions || data.response}</div>`;
+
+        // Add recommended dishes if available
+        if (data.recommendedDishes && data.recommendedDishes.length > 0) {
+          let dishesHTML = '<div class="recommended-dishes"><h4>Recommended Dishes:</h4>';
+          data.recommendedDishes.forEach((dish) => {
+            dishesHTML += `<div class="dish-item">• <strong>${dish.name}</strong> - $${dish.price} (${dish.cuisine})</div>`;
+          });
+          dishesHTML += '</div>';
+          botContent += dishesHTML;
+        }
+
+        botMessageDiv.innerHTML = botContent;
+        chatContainer.appendChild(botMessageDiv);
+
+        // Add bot response to history
+        chatHistory.push({
+          role: 'model',
+          content: data.suggestions || data.response
+        });
+
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } catch (error) {
+        loadingDiv.remove();
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'message bot';
+        errorDiv.innerHTML = `<div class="message-bubble error">❌ Error: ${error.message}</div>`;
+        chatContainer.appendChild(errorDiv);
+      }
+    }
+
+    // Event listeners
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('userInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        document.getElementById('authMessage').textContent = 'Please enter both email and password';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.token) {
+          token = data.token;
+          localStorage.setItem('token', token);
+          checkAuth();
+        } else {
+          document.getElementById('authMessage').textContent = data.message || 'Login failed';
+        }
+      } catch (error) {
+        document.getElementById('authMessage').textContent = 'Error logging in';
+      }
+    });
+
+    // Initialize on page load
+    checkAuth();
+  </script>
+</body>
+</html>
